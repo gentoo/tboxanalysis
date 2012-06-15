@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby19
 # -*- coding: utf-8 -*-
 # Copyright © 2012 Diego Elio Pettenò <flameeyes@flameeyes.eu>
 #
