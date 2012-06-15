@@ -17,6 +17,7 @@
 
 require 'inifile'
 require 'aws'
+require 'socket'
 require 'archive/tar/minitar'
 require 'builder'
 
@@ -46,54 +47,64 @@ domain_name = config['aws']['domain']
 domain = sdb.domains[domain_name]
 sdb.domains.create(domain_name) unless domain.exists?
 
-Archive::Tar::Minitar::Reader.open($stdin) do |input|
-  input.each do |log|
-    matches = 0
+Socket.tcp_server_loop("::", 28011) do |sock, client_host|
+  begin
+    hostname = client_host.getnameinfo()[0]
+    puts "Received connection from #{hostname}"
 
-    next unless log.file?
+    Archive::Tar::Minitar::Reader.open(sock) do |input|
+      input.each do |log|
+        matches = 0
 
-    log_name  = File.basename(log.name, ".log")
+        next unless log.file?
 
-    xml_builder = Builder::XmlMarkup.new(:indent => 2)
-    xml_builder.instruct!
+        log_name  = File.basename(log.name, ".log")
 
-    html_output = xml_builder.html {
-      xml_builder.head {
-        xml_builder.link(:href => "htmlgrep.css",
-                        :rel => "stylesheet",
-                        :type => "text/css")
-      }
+        xml_builder = Builder::XmlMarkup.new(:indent => 2)
+        xml_builder.instruct!
 
-      xml_builder.body {
-        xml_builder.ol {
-          log.read.split("\n").each do |line|
-            if line =~ match
-              xml_builder.li line, :class => "match"
-              matches += 1
-            else
-              xml_builder.li line
-            end
-          end
+        html_output = xml_builder.html {
+          xml_builder.head {
+            xml_builder.link(:href => "../htmlgrep.css",
+                             :rel => "stylesheet",
+                             :type => "text/css")
+          }
+
+          xml_builder.body {
+            xml_builder.ol {
+              log.read.split("\n").each do |line|
+                if line =~ match
+                  xml_builder.li line, :class => "match"
+                  matches += 1
+                else
+                  xml_builder.li line
+                end
+              end
+            }
+          }
         }
-      }
-    }
 
-    html_log = bucket.objects.create(log_name + ".html",
-                                     :data => html_output,
-                                     :acl => :public_read,
-                                     # if we don't use text/html Chromium is
-                                     # unable to render it with the CSS.
-                                     :content_type => 'text/html',
-                                     :storage_class => :reduced_redundancy)
+        html_log = bucket.objects.create("#{hostname}/#{log_name}.html",
+                                         :data => html_output,
+                                         :acl => :public_read,
+                                         # if we don't use text/html Chromium is
+                                         # unable to render it with the CSS.
+                                         :content_type => 'text/html',
+                                         :storage_class => :reduced_redundancy)
 
-    log_parts = log_name.split(':')
-    pkg_name = log_parts[0..1].join("/")
-    date_time = log_parts[2]
+        log_parts = log_name.split(':')
+        pkg_name = log_parts[0..1].join("/")
+        date_time = log_parts[2]
 
-    domain.items.create(log_name,
-                        :matches => matches,
-                        :pkg => pkg_name,
-                        :date => date_time,
-                        :public_url => html_log.public_url);
+        domain.items.create("#{hostname}/#{log_name}",
+                            :host => hostname,
+                            :pkg => pkg_name,
+                            :date => date_time,
+                            :matches => matches,
+                            :public_url => html_log.public_url);
+      end
+    end
+  ensure
+    sock.close
   end
 end
