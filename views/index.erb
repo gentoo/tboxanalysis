@@ -12,8 +12,10 @@
       </tr>
 
       <% items.each do |item| %>
-      	<tr>
-	  <td><a href="<%= item.attributes[:public_url].values[0] %>"><%= item.name %></a></td>
+        <tr>
+	  <td><%= item.attributes[:host].values[0] %></td>
+	  <td><a href="<%= item.attributes[:public_url].values[0] %>"><%= item.pkg %></a></td>
+	  <td><%= item.attributes[:date].values[0] %></td>
 	  <td><%= item.attributes[:pkg].values[0] %></td>
 	  <td><%= item.attributes[:matches].values[0] %></td>
 	</tr>
