@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Tinderbox results index</title>
+  </head>
+  <body>
+    <table>
+      <tr>
+	<th>filename</th>
+	<th>package</th>
+	<th>matches</th>
+      </tr>
+
+      <% items.each do |item| %>
+      	<tr>
+	  <td><a href="<%= item.attributes[:public_url].values[0] %>"><%= item.name %></a></td>
+	  <td><%= item.attributes[:pkg].values[0] %></td>
+	  <td><%= item.attributes[:matches].values[0] %></td>
+	</tr>
+      <% end %>
+    </table>
+  </body>
+</html>
