@@ -1,0 +1,8 @@
+li {
+    white-space: pre;
+    font-family: monospace;
+}
+
+li.match {
+    background-color: #FF6B6B;
+}
