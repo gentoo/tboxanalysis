@@ -28,5 +28,15 @@ domain = sdb.domains[domain_name]
 sdb.domains.create(domain_name) unless domain.exists?
 
 get '/' do
-  erb :index, :locals => { :items => domain.items.order(:date) }
+  items = domain.items.order(:date, :desc).limit(100).select(:all).map do |data|
+    { :name       => data.name,
+      :host       => data.attributes["host"][0],
+      :public_url => data.attributes["public_url"][0],
+      :date       => data.attributes["date"][0],
+      :pkg        => data.attributes["pkg"][0],
+      :matches    => data.attributes["matches"][0]
+    }
+  end
+
+  erb :index, :locals => { :items => items }
 end
