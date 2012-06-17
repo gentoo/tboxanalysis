@@ -78,7 +78,7 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
                 match = false
 
                 # remove escape sequences
-                line.gsub!(/\x1b[^\x40-\x7e]+[\x40-\x7e]/, '')
+                line.gsub!(/\x1b\[[^\x40-\x7e]+[\x40-\x7e]/, '')
 
                 if line =~ warnings
                   match = true
