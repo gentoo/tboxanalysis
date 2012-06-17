@@ -33,12 +33,14 @@ get '/' do
     order(:date, :desc).
     limit(100).
     select(:all).map do |data|
-    { :name       => data.name,
-      :host       => (data.attributes["host"][0] rescue ""),
-      :public_url => (data.attributes["public_url"][0] rescue ""),
-      :date       => (data.attributes["date"][0] rescue ""),
-      :pkg        => (data.attributes["pkg"][0] rescue ""),
-      :matches    => (data.attributes["matches"][0] rescue "")
+    { :name        => data.name,
+      :host        => (data.attributes["host"][0] rescue ""),
+      :public_url  => (data.attributes["public_url"][0] rescue ""),
+      :date        => (data.attributes["date"][0] rescue ""),
+      :pkg         => (data.attributes["pkg"][0] rescue ""),
+      :matches     => (data.attributes["matches"][0] rescue ""),
+      :pkg_failed  => (data.attributes["pkg_failed"][0] == "true" rescue false),
+      :test_failed => (data.attributes["test_failed"][0] == "true" rescue false),
     }
   end
 

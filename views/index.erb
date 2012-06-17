@@ -6,8 +6,9 @@
   <body>
     <table>
       <tr>
-	<th>filename</th>
-	<th>package</th>
+	<th>hostname</th>
+	<th>package name</th>
+	<th>date</th>
 	<th>matches</th>
       </tr>
 
@@ -17,7 +18,11 @@
 	  <td><a href="<%= item[:public_url] %>"><%= item[:pkg] %></a></td>
 	  <td><%= item[:date] %></td>
 	  <td><%= item[:pkg] %></td>
-	  <td><%= item[:matches] %></td>
+	  <td>
+	    <%= item[:matches] %>
+	    <% if item[:test_failed] %>[TF]<% end %>
+	    <% if item[:pkg_failed] %>[BF]<% end %>
+	  </td>
 	</tr>
       <% end %>
     </table>
