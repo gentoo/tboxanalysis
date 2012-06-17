@@ -21,7 +21,7 @@ require 'socket'
 require 'archive/tar/minitar'
 require 'builder'
 
-match = Regexp.new("( .*\\*.* ERROR: .*failed|detected file collision|Tinderbox QA Warning!|QA Notice: (Pre-stripped|file does not exist|command not found|USE flag|Files built without respecting LDFLAGS|The following files)|linux_config_exists|will always overflow|called with bigger|maintainer mode detected|econf called in src_compile)")
+warnings = Regexp.new("(Tinderbox QA Warning!|QA Notice: (Pre-stripped|file does not exist|command not found|USE flag|Files built without respecting LDFLAGS|The following files)|linux_config_exists|will always overflow|called with bigger|maintainer mode detected|econf called in src_compile)")
 
 config = IniFile.new("./tboxanalysis.ini")
 
@@ -55,6 +55,8 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
     Archive::Tar::Minitar::Reader.open(sock) do |input|
       input.each do |log|
         matches = 0
+        pkg_failed = false
+        test_failed = false
 
         next unless log.file?
 
@@ -73,11 +75,23 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
           xml_builder.body {
             xml_builder.ol {
               log.read.split("\n").each do |line|
-                if line =~ match
-                  xml_builder.li line, :class => "match"
+                match = false
+
+                if line =~ warnings
+                  match = true
+                elsif line =~ /^ \* ERROR: .* failed \(test phase\):/
+                  test_failed = true
+                  match = true
+                elsif line =~ /(^ \* ERROR: .* failed|detected file collision)/
+                  pkg_failed = true
+                  match = true
+                end
+
+                if match
                   matches += 1
+                  xml_builder.li(line, :class => "match")
                 else
-                  xml_builder.li line
+                  xml_builder.li(line)
                 end
               end
             }
@@ -101,6 +115,8 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
                             :pkg => pkg_name,
                             :date => date_time,
                             :matches => matches,
+                            :pkg_failed => pkg_failed,
+                            :test_failed => test_failed,
                             :public_url => html_log.public_url);
       end
     end
