@@ -28,13 +28,17 @@ domain = sdb.domains[domain_name]
 sdb.domains.create(domain_name) unless domain.exists?
 
 get '/' do
-  items = domain.items.order(:date, :desc).limit(100).select(:all).map do |data|
+  items = domain.items.
+    where("matches > ?", 0).
+    order(:date, :desc).
+    limit(100).
+    select(:all).map do |data|
     { :name       => data.name,
-      :host       => data.attributes["host"][0],
-      :public_url => data.attributes["public_url"][0],
-      :date       => data.attributes["date"][0],
-      :pkg        => data.attributes["pkg"][0],
-      :matches    => data.attributes["matches"][0]
+      :host       => (data.attributes["host"][0] rescue ""),
+      :public_url => (data.attributes["public_url"][0] rescue ""),
+      :date       => (data.attributes["date"][0] rescue ""),
+      :pkg        => (data.attributes["pkg"][0] rescue ""),
+      :matches    => (data.attributes["matches"][0] rescue "")
     }
   end
 
