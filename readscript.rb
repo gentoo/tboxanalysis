@@ -49,7 +49,7 @@ sdb.domains.create(domain_name) unless domain.exists?
 
 Socket.tcp_server_loop("::", 28011) do |sock, client_host|
   begin
-    hostname = client_host.getnameinfo()[0]
+    hostname = client_host.getnameinfo()[0] rescue client_host.ip_address
     puts "Received connection from #{hostname}"
 
     Archive::Tar::Minitar::Reader.open(sock) do |input|
