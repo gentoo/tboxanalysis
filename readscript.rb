@@ -57,6 +57,8 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
         matches = 0
         pkg_failed = false
         test_failed = false
+        bug_assignee = 'bug-wranglers@gentoo.org'
+        bug_cc = ''
 
         next unless log.file?
 
@@ -88,6 +90,9 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
                 elsif line =~ /(^ \* ERROR: .* failed|detected file collision)/
                   pkg_failed = true
                   match = true
+                elsif line =~ /^ * Maintainer: ([a-z0-9.@_-+]+)(?: ([a-z0-9.@_-+]+))?$/
+                  bug_assignee = $1
+                  bug_cc = $2
                 end
 
                 if match
@@ -120,7 +125,9 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
                             :matches => matches,
                             :pkg_failed => pkg_failed,
                             :test_failed => test_failed,
-                            :public_url => html_log.public_url);
+                            :public_url => html_log.public_url,
+                            :bug_assignee => bug_assignee,
+                            :bug_cc => bug_cc);
       end
     end
   ensure
