@@ -18,6 +18,8 @@
 require 'inifile'
 require 'aws'
 require 'sinatra'
+require 'active_support'
+require 'active_support/core_ext/object/to_query'
 
 config = IniFile.new("./tboxanalysis.ini")
 sdb = AWS::SimpleDB.new(:access_key_id => config['aws']['access_key'],
@@ -33,14 +35,22 @@ get '/' do
     order(:date, :desc).
     limit(150).
     select(:all).map do |data|
-    { :name        => data.name,
-      :host        => (data.attributes["host"][0] rescue ""),
-      :public_url  => (data.attributes["public_url"][0] rescue ""),
-      :date        => (data.attributes["date"][0] rescue ""),
-      :pkg         => (data.attributes["pkg"][0] rescue ""),
-      :matches     => (data.attributes["matches"][0] rescue ""),
-      :pkg_failed  => (data.attributes["pkg_failed"][0] == "true" rescue false),
-      :test_failed => (data.attributes["test_failed"][0] == "true" rescue false),
+    { :name         => data.name,
+      :host         => (data.attributes["host"][0] rescue ""),
+      :public_url   => (data.attributes["public_url"][0] rescue ""),
+      :date         => (data.attributes["date"][0] rescue ""),
+      :pkg          => (data.attributes["pkg"][0] rescue ""),
+      :matches      => (data.attributes["matches"][0] rescue ""),
+      :pkg_failed   => (data.attributes["pkg_failed"][0] == "true" rescue false),
+      :test_failed  => (data.attributes["test_failed"][0] == "true" rescue false),
+      :bug_template => {
+        :assigned_to  => (data.attributes["bug_assignee"][0] rescue "bug-wranglers@gentoo.org"),
+        :cc           => (data.attributes["bug_cc"][0] rescue ""),
+        :bug_file_loc => (data.attributes["public_url"][0] rescue ""),
+        :product      => "Gentoo Linux",
+        :comment      => (File.read("emerge-infos/" + data.attributes["host"][0]) rescue ""),
+        :short_desc   => ("#{data.attributes["pkg"][0]}: " rescue ""),
+      }
     }
   end
 

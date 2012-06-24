@@ -8,4 +8,5 @@ end
 
 group :display do
   gem 'sinatra'
+  gem 'activesupport'
 end

@@ -15,7 +15,10 @@
       <% items.each do |item| %>
         <tr>
 	  <td><%= item[:host] %></td>
-	  <td><a href="<%= item[:public_url] %>"><%= item[:pkg] %></a></td>
+	  <td>
+	    <a href="https://bugs.gentoo.org/enter_bug.cgi?<%= item[:bug_template].to_query %>">[B]</a>
+	    <a href="<%= item[:public_url] %>"><%= item[:pkg] %></a>
+	  </td>
 	  <td><%= item[:date] %></td>
 	  <td><%= item[:pkg] %></td>
 	  <td>
