@@ -31,7 +31,7 @@ get '/' do
   items = domain.items.
     where("matches > ?", 0).
     order(:date, :desc).
-    limit(100).
+    limit(150).
     select(:all).map do |data|
     { :name        => data.name,
       :host        => (data.attributes["host"][0] rescue ""),
