@@ -48,89 +48,91 @@ domain = sdb.domains[domain_name]
 sdb.domains.create(domain_name) unless domain.exists?
 
 Socket.tcp_server_loop("::", 28011) do |sock, client_host|
-  begin
-    hostname = client_host.getnameinfo()[0] rescue client_host.ip_address
-    puts "Received connection from #{hostname}"
+  Thread.new {
+    begin
+      hostname = client_host.getnameinfo()[0] rescue client_host.ip_address
+      puts "Received connection from #{hostname}"
 
-    Archive::Tar::Minitar::Reader.open(sock) do |input|
-      input.each do |log|
-        matches = 0
-        pkg_failed = false
-        test_failed = false
-        bug_assignee = 'bug-wranglers@gentoo.org'
-        bug_cc = ''
+      Archive::Tar::Minitar::Reader.open(sock) do |input|
+        input.each do |log|
+          matches = 0
+          pkg_failed = false
+          test_failed = false
+          bug_assignee = 'bug-wranglers@gentoo.org'
+          bug_cc = ''
 
-        next unless log.file?
+          next unless log.file?
 
-        log_name  = File.basename(log.name, ".log")
+          log_name  = File.basename(log.name, ".log")
 
-        xml_builder = Builder::XmlMarkup.new(:indent => 2)
-        xml_builder.instruct!
+          xml_builder = Builder::XmlMarkup.new(:indent => 2)
+          xml_builder.instruct!
 
-        html_output = xml_builder.html {
-          xml_builder.head {
-            xml_builder.link(:href => "../htmlgrep.css",
-                             :rel => "stylesheet",
-                             :type => "text/css")
-          }
+          html_output = xml_builder.html {
+            xml_builder.head {
+              xml_builder.link(:href => "../htmlgrep.css",
+                               :rel => "stylesheet",
+                               :type => "text/css")
+            }
 
-          xml_builder.body {
-            xml_builder.ol {
-              log.read.split("\n").each do |line|
-                match = false
+            xml_builder.body {
+              xml_builder.ol {
+                log.read.split("\n").each do |line|
+                  match = false
 
-                # remove escape sequences
-                line.gsub!(/\x1b\[[^\x40-\x7e]+[\x40-\x7e]/, '')
+                  # remove escape sequences
+                  line.gsub!(/\x1b\[[^\x40-\x7e]+[\x40-\x7e]/, '')
 
-                if line =~ warnings
-                  match = true
-                elsif line =~ /^ \* ERROR: .* failed \(test phase\):/
-                  test_failed = true
-                  match = true
-                elsif line =~ /(^ \* ERROR: .* failed|detected file collision)/
-                  pkg_failed = true
-                  match = true
-                elsif line =~ /^ \* Maintainer: ([a-z0-9.@_+-]+)(?: ([a-z0-9.@_+-]+))?$/
-                  bug_assignee = $1
-                  bug_cc = $2
+                  if line =~ warnings
+                    match = true
+                  elsif line =~ /^ \* ERROR: .* failed \(test phase\):/
+                    test_failed = true
+                    match = true
+                  elsif line =~ /(^ \* ERROR: .* failed|detected file collision)/
+                    pkg_failed = true
+                    match = true
+                  elsif line =~ /^ \* Maintainer: ([a-z0-9.@_+-]+)(?: ([a-z0-9.@_+-]+))?$/
+                    bug_assignee = $1
+                    bug_cc = $2
+                  end
+
+                  if match
+                    matches += 1
+                    xml_builder.li(line, :class => "match")
+                  else
+                    xml_builder.li(line)
+                  end
                 end
-
-                if match
-                  matches += 1
-                  xml_builder.li(line, :class => "match")
-                else
-                  xml_builder.li(line)
-                end
-              end
+              }
             }
           }
-        }
 
-        html_log = bucket.objects.create("#{hostname}/#{log_name}.html",
-                                         :data => html_output,
-                                         :acl => :public_read,
-                                         # if we don't use text/html Chromium is
-                                         # unable to render it with the CSS.
-                                         :content_type => 'text/html',
-                                         :storage_class => :reduced_redundancy)
+          html_log = bucket.objects.create("#{hostname}/#{log_name}.html",
+                                           :data => html_output,
+                                           :acl => :public_read,
+                                           # if we don't use text/html Chromium is
+                                           # unable to render it with the CSS.
+                                           :content_type => 'text/html',
+                                           :storage_class => :reduced_redundancy)
 
-        log_parts = log_name.split(':')
-        pkg_name = log_parts[0..1].join("/")
-        date_time = log_parts[2]
+          log_parts = log_name.split(':')
+          pkg_name = log_parts[0..1].join("/")
+          date_time = log_parts[2]
 
-        domain.items.create("#{hostname}/#{log_name}",
-                            :host => hostname,
-                            :pkg => pkg_name,
-                            :date => date_time,
-                            :matches => matches,
-                            :pkg_failed => pkg_failed,
-                            :test_failed => test_failed,
-                            :public_url => html_log.public_url,
-                            :bug_assignee => bug_assignee,
-                            :bug_cc => bug_cc);
+          domain.items.create("#{hostname}/#{log_name}",
+                              :host => hostname,
+                              :pkg => pkg_name,
+                              :date => date_time,
+                              :matches => matches,
+                              :pkg_failed => pkg_failed,
+                              :test_failed => test_failed,
+                              :public_url => html_log.public_url,
+                              :bug_assignee => bug_assignee,
+                              :bug_cc => bug_cc);
+        end
       end
+    ensure
+      sock.close
     end
-  ensure
-    sock.close
-  end
+  }
 end
