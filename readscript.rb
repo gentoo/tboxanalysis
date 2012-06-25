@@ -63,6 +63,8 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
 
           next unless log.file?
 
+          puts "  got file #{log.name}"
+
           log_name  = File.basename(log.name, ".log")
 
           xml_builder = Builder::XmlMarkup.new(:indent => 2)
