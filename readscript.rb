@@ -93,7 +93,7 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
                   elsif line =~ /(^ \* ERROR: .* failed|detected file collision)/
                     pkg_failed = true
                     match = true
-                  elsif line =~ /^ \* Maintainer: ([a-z0-9.@_+-]+)(?: ([a-z0-9.@_+-]+))?$/
+                  elsif line =~ /^ \* Maintainer: ([a-z0-9.@_+-]+)(?: ([a-z0-9.@_+,-]+))?$/
                     bug_assignee = $1
                     bug_cc = $2
                   end
