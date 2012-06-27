@@ -16,14 +16,20 @@
         <tr>
 	  <td><%= item[:host] %></td>
 	  <td>
-	    <a href="https://bugs.gentoo.org/enter_bug.cgi?<%= item[:bug_template].to_query %>">[B]</a>
+	    <a href="https://bugs.gentoo.org/enter_bug.cgi?<%= item[:bug_template].to_query %>">
+	      <img src="bug.svg" width="16px" height="16px" alt="[B]" />
+	    </a>
 	    <a href="<%= item[:public_url] %>"><%= item[:pkg] %></a>
 	  </td>
 	  <td><%= item[:date] %></td>
 	  <td>
 	    <%= item[:matches] %>
-	    <% if item[:test_failed] %>[TF]<% end %>
-	    <% if item[:pkg_failed] %>[BF]<% end %>
+	    <% if item[:test_failed] %>
+	      <img src="magnifier.svg" width="16px" height="16px" alt="[TF]" />
+	    <% end %>
+	    <% if item[:pkg_failed] %>
+	      <img src="wrench.svg" width="16px" height="16px" alt="[BF]" />
+	    <% end %>
 	  </td>
 	</tr>
       <% end %>
