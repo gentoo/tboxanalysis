@@ -45,6 +45,7 @@ get '/' do
                        ((data.attributes["test_failed"][0] == "true" rescue false) ? 1 : 0),
       :pkg_failed   => (data.attributes["pkg_failed"][0] == "true" rescue false),
       :test_failed  => (data.attributes["test_failed"][0] == "true" rescue false),
+      :collision    => (data.attributes["collision"][0] == "true" rescue false),
       :bug_template => {
         :assigned_to  => (data.attributes["bug_assignee"][0] rescue "bug-wranglers@gentoo.org"),
         :cc           => (data.attributes["bug_cc"][0] rescue ""),

@@ -90,8 +90,12 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
                   elsif line =~ /^ \* ERROR: .* failed \(test phase\):/
                     test_failed = true
                     match = true
-                  elsif line =~ /(^ \* ERROR: .* failed|detected file collision)/
+                  elsif line =~ /^ \* ERROR: .* failed/
                     pkg_failed = true
+                    match = true
+                  elsif line =~ /Detected file collision/
+                    pkg_failed = true
+                    collision = true
                     match = true
                   elsif line =~ /^ \* Maintainer: ([a-zA-Z0-9.@_+-]+)(?: ([a-zA-Z0-9.@_+,-]+))?$/
                     bug_assignee = $1
@@ -128,6 +132,7 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
                               :matches => matches,
                               :pkg_failed => pkg_failed,
                               :test_failed => test_failed,
+                              :collision => collision,
                               :public_url => html_log.public_url,
                               :bug_assignee => bug_assignee,
                               :bug_cc => bug_cc);

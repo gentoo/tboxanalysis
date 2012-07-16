@@ -31,6 +31,9 @@
 	    <% if item[:pkg_failed] %>
 	      <img src="wrench.png" width="16px" height="16px" alt="[BF]" />
 	    <% end %>
+	    <% if item[:pkg_failed] %>
+	      [C]
+	    <% end %>
 	  </td>
 	</tr>
       <% end %>
