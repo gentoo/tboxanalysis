@@ -58,6 +58,7 @@ Socket.tcp_server_loop("::", 28011) do |sock, client_host|
           matches = 0
           pkg_failed = false
           test_failed = false
+          collision = false
           bug_assignee = 'bug-wranglers@gentoo.org'
           bug_cc = ''
 
