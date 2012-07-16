@@ -24,7 +24,7 @@
 	  </td>
 	  <td><%= item[:date] %></td>
 	  <td>
-	    <%= item[:matches] %>
+	    <%= item[:matches] unless item[:matches] == 0 %>
 	    <% if item[:test_failed] %>
 	      <img src="magnifier.png" width="16px" height="16px" alt="[TF]" />
 	    <% end %>
