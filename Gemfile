@@ -1,5 +1,5 @@
 gem 'aws-sdk'
-gem 'inifile'
+gem 'inifile', '>= 2'
 
 group :analysis do
   gem 'archive-tar-minitar'

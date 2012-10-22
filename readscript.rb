@@ -15,6 +15,7 @@
 # ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 # SOFTWARE.
 
+gem 'inifile', '>= 2'
 require 'inifile'
 require 'aws'
 require 'socket'
@@ -23,7 +24,7 @@ require 'builder'
 
 warnings = Regexp.new("(Tinderbox QA Warning!|QA Notice: (Pre-stripped|file does not exist|command not found|USE flag|Files built without respecting|The following files)|linux_config_exists|will always overflow|called with bigger|maintainer mode detected|econf called in src_compile)")
 
-config = IniFile.new("./tboxanalysis.ini")
+config = IniFile.new(File.read("./tboxanalysis.ini"))
 
 s3 = AWS::S3.new(:access_key_id => config['aws']['access_key'],
                  :secret_access_key => config['aws']['secret_key'])

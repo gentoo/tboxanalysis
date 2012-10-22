@@ -15,13 +15,14 @@
 # ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 # SOFTWARE.
 
+gem 'inifile', '>= 2'
 require 'inifile'
 require 'aws'
 require 'sinatra'
 require 'active_support'
 require 'active_support/core_ext/object/to_query'
 
-config = IniFile.new("./tboxanalysis.ini")
+config = IniFile.new(File.read("./tboxanalysis.ini"))
 sdb = AWS::SimpleDB.new(:access_key_id => config['aws']['access_key'],
                         :secret_access_key => config['aws']['secret_key'])
 
