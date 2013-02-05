@@ -50,10 +50,10 @@ get '/' do
       :bug_template => {
         :assigned_to  => (data.attributes["bug_assignee"][0] rescue "bug-wranglers@gentoo.org"),
         :cc           => (data.attributes["bug_cc"][0] rescue ""),
-        :bug_file_loc => (data.attributes["public_url"][0] rescue ""),
         :product      => "Gentoo Linux",
         :component    => "Ebuilds",
-        :comment      => (File.read("emerge-infos/" + data.attributes["host"][0]) rescue ""),
+        :comment      => (data.attributes["public_url"][0] rescue "") + "\n\n" +
+                         (File.read("emerge-infos/" + data.attributes["host"][0]) rescue ""),
         :short_desc   => ("#{data.attributes["pkg"][0]}: " rescue ""),
       }
     }
