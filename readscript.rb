@@ -22,7 +22,7 @@ require 'socket'
 require 'archive/tar/minitar'
 require 'builder'
 
-warnings = Regexp.new("(Tinderbox QA Warning!|QA Notice: (Pre-stripped|file does not exist|command not found|USE flag|Files built without respecting|The following files)|linux_config_exists|will always overflow|called with bigger|maintainer mode detected|econf called in src_compile)")
+warnings = Regexp.new("(Tinderbox QA Warning!|QA Notice: (Pre-stripped|file does not exist|command not found|USE flag|Files built without respecting|The following files)|linux_config_exists|will always overflow|called with bigger|maintainer mode detected|econf called in src_compile|udev rules should be installed)")
 
 config = IniFile.new(File.read("./tboxanalysis.ini"))
 
