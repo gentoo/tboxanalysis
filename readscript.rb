@@ -24,7 +24,7 @@ require 'builder'
 
 warnings = Regexp.new("(Tinderbox QA Warning!|QA Notice: (Pre-stripped|file does not exist|command not found|USE flag|Files built without respecting|The following files)|linux_config_exists|will always overflow|called with bigger|maintainer mode detected|econf called in src_compile|udev rules should be installed)")
 
-config = IniFile.new(File.read("./tboxanalysis.ini"))
+config = IniFile.load("./tboxanalysis.ini")
 
 s3 = AWS::S3.new(:access_key_id => config['aws']['access_key'],
                  :secret_access_key => config['aws']['secret_key'])

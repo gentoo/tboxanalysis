@@ -22,7 +22,7 @@ require 'sinatra'
 require 'active_support'
 require 'active_support/core_ext/object/to_query'
 
-config = IniFile.new(File.read("./tboxanalysis.ini"))
+config = IniFile.load("./tboxanalysis.ini")
 sdb = AWS::SimpleDB.new(:access_key_id => config['aws']['access_key'],
                         :secret_access_key => config['aws']['secret_key'])
 
